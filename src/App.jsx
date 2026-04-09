@@ -1,7 +1,7 @@
 import ZoomEnhance from "./components/ZoomEnhance";
 
 function App() {
-	return <ZoomEnhance />;
+  return <ZoomEnhance />;
 }
 
 export default App;
