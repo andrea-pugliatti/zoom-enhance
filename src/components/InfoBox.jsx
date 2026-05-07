@@ -1,6 +1,19 @@
 import LaserGrid from "./LaserGrid";
 
-export default function InfoBox({ isZooming, rect, enhanceCount, handleImageUpload, resetAll }) {
+const STATUS_LABELS = {
+  loading: "LOADING MODEL",
+  ready: "READY",
+  error: "MODEL ERROR"
+};
+
+export default function InfoBox({
+  isZooming,
+  rect,
+  enhanceCount,
+  handleImageUpload,
+  resetAll,
+  modelStatus = "ready"
+}) {
   return (
     <div className="info-box">
       <div>
@@ -10,7 +23,7 @@ export default function InfoBox({ isZooming, rect, enhanceCount, handleImageUplo
 
       <div className="info">
         <div className="darker-text">STATUS</div>
-        <div>{isZooming ? "ENHANCING" : "READY"}</div>
+        <div>{isZooming ? "ENHANCING" : (STATUS_LABELS[modelStatus] ?? "READY")}</div>
         <div className="darker-text">COORDINATES</div>
         <div>{rect ? `(${Math.round(rect.x)},${Math.round(rect.y)})` : "(0,0)"}</div>
         <div className="darker-text">ENHANCE LEVEL</div>

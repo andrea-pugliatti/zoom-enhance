@@ -10,7 +10,7 @@
 
 ### Key Features
 
-- **AI Upscaling**: Utilizes [UpscalerJS](https://upscalerjs.com/) with the ESRGAN-Slim model to actually improve image resolution.
+- **AI Upscaling**: Utilizes Hugging Face Transformers with the Swin2SR model to actually improve image resolution.
 - **Retro Aesthetic**: A stylized UI featuring CRT scanlines, a laser grid background, and 80s-style typography.
 - **Interactive Experience**: Click to select an area, watch the "scanning" animation, and hear retro synthesized sound effects as the image is processed.
 - **Responsive Interface**: Built with React and Vite for a smooth, modern development experience.
@@ -19,7 +19,7 @@
 
 - **React**: Frontend framework.
 - **Vite**: Fast build tool and development server.
-- **UpscalerJS**: AI image upscaling library.
+- **Hugging Face Transformers**: AI image upscaling library.
 - **Web Audio API**: For real-time synthesized retro sound effects.
 - **CSS3**: For CRT effects, animations, and the laser grid.
 
@@ -43,7 +43,7 @@
 
 ### Caratteristiche Principali
 
-- **Upscaling AI**: Utilizza [UpscalerJS](https://upscalerjs.com/) con il modello ESRGAN-Slim per migliorare effettivamente la risoluzione dell'immagine.
+- **Upscaling AI**: Utilizza Hugging Face Transformers con il modello Swin2SR per migliorare effettivamente la risoluzione dell'immagine.
 - **Estetica Retro**: Un'interfaccia stilizzata con linee di scansione CRT, sfondo a griglia laser e tipografia in stile anni '80.
 - **Esperienza Interattiva**: Clicca per selezionare un'area, osserva l'animazione di "scansione" e ascolta gli effetti sonori sintetizzati mentre l'immagine viene elaborata.
 - **Interfaccia Reattiva**: Costruita con React e Vite per un'esperienza di sviluppo fluida e moderna.
@@ -52,7 +52,7 @@
 
 - **React**: Framework frontend.
 - **Vite**: Build tool e server di sviluppo veloce.
-- **UpscalerJS**: Libreria per l'upscaling delle immagini tramite AI.
+- **Hugging Face Transformers**: Libreria per l'upscaling delle immagini tramite AI.
 - **Web Audio API**: Per la generazione in tempo reale di effetti sonori retro.
 - **CSS3**: Per gli effetti CRT, le animazioni e la griglia laser.
 

@@ -1,8 +1,8 @@
-import { x2 } from "@upscalerjs/esrgan-slim";
-import { useMemo, useRef, useState } from "react";
-import Upscaler from "upscaler";
+import { useEffect, useRef, useState } from "react";
 import CrtTv from "./CrtTv";
 import InfoBox from "./InfoBox";
+import { getRawImage, loadUpscaler } from "../utils/upscaler";
+import playSound from "../utils/sound";
 
 export default function ZoomEnhance() {
   const [currentImage, setCurrentImage] = useState(null);
@@ -12,8 +12,24 @@ export default function ZoomEnhance() {
   const [zoomLevel, setZoomLevel] = useState(1);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const [ratio, setRatio] = useState(null);
+  const [modelStatus, setModelStatus] = useState("loading");
 
   const containerRef = useRef(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    loadUpscaler()
+      .then(() => {
+        if (!cancelled) setModelStatus("ready");
+      })
+      .catch((err) => {
+        console.error("Upscaler failed to load:", err);
+        if (!cancelled) setModelStatus("error");
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const resetAll = () => {
     setCurrentImage(null);
@@ -24,13 +40,25 @@ export default function ZoomEnhance() {
     setIsZooming(false);
   };
 
-  const upscaler = useMemo(
-    () =>
-      new Upscaler({
-        model: x2
-      }),
-    []
-  );
+  const upscaleImage = async (canvas, ctx) => {
+    const [upscaler, RawImage] = await Promise.all([loadUpscaler(), getRawImage()]);
+    const input = await RawImage.fromCanvas(canvas);
+    const output = await upscaler(input);
+    const image = Array.isArray(output) ? output[0] : output;
+
+    const rgba = new Uint8ClampedArray(image.width * image.height * 4);
+    const src = image.data;
+    const channels = image.channels ?? 3;
+    for (let i = 0, j = 0; i < src.length; i += channels, j += 4) {
+      rgba[j] = src[i];
+      rgba[j + 1] = channels > 1 ? src[i + 1] : src[i];
+      rgba[j + 2] = channels > 2 ? src[i + 2] : src[i];
+      rgba[j + 3] = channels === 4 ? src[i + 3] : 255;
+    }
+    ctx.putImageData(new ImageData(rgba, image.width, image.height), 0, 0);
+
+    return canvas.toDataURL();
+  };
 
   const handleImageUpload = (e) => {
     const file = e.target.files?.[0];
@@ -61,30 +89,8 @@ export default function ZoomEnhance() {
     }
   };
 
-  const playSound = (freq, type, duration) => {
-    try {
-      const audioCtx = new window.AudioContext();
-      const oscillator = audioCtx.createOscillator();
-      const gainNode = audioCtx.createGain();
-
-      oscillator.type = type;
-      oscillator.frequency.setValueAtTime(freq, audioCtx.currentTime);
-
-      gainNode.gain.setValueAtTime(0.03, audioCtx.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
-
-      oscillator.connect(gainNode);
-      gainNode.connect(audioCtx.destination);
-
-      oscillator.start();
-      oscillator.stop(audioCtx.currentTime + duration);
-    } catch (e) {
-      console.error("Audio not supported: ", e);
-    }
-  };
-
   const handleImageClick = async (e) => {
-    if (!currentImage || isZooming || !containerRef.current) return;
+    if (!currentImage || isZooming || !containerRef.current || modelStatus !== "ready") return;
 
     const container = containerRef.current;
     const rect = container.getBoundingClientRect();
@@ -144,17 +150,15 @@ export default function ZoomEnhance() {
             canvas.height
           );
 
-          if (upscaler) {
-            const upscaled = await upscaler.upscale(canvas.toDataURL());
-            setCurrentImage(upscaled);
-            setZoomLevel(1);
-            setOffset({ x: 0, y: 0 });
-            setRect(null);
-            setEnhanceCount((prev) => prev + 1);
-          }
+          const upscaled = await upscaleImage(canvas, ctx);
+          setCurrentImage(upscaled);
+          setZoomLevel(1);
+          setOffset({ x: 0, y: 0 });
+          setRect(null);
+          setEnhanceCount((prev) => prev + 1);
         }
       } catch (err) {
-        console.error("Enhancement failed", err);
+        console.error("Enhancement failed: ", err);
       } finally {
         clearInterval(enhanceInterval);
         setIsZooming(false);
@@ -184,6 +188,7 @@ export default function ZoomEnhance() {
           enhanceCount={enhanceCount}
           handleImageUpload={handleImageUpload}
           resetAll={resetAll}
+          modelStatus={modelStatus}
         />
       </div>
     </div>
