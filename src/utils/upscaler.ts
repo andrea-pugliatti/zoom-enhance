@@ -1,7 +1,9 @@
+import type { RawImage, ProgressCallback, ImageToImagePipeline } from "@huggingface/transformers";
+
 const UPSCALE_MODEL_ID = "Xenova/swin2SR-classical-sr-x2-64";
 
-let upscalerPromise = null;
-let rawImagePromise = null;
+let upscalerPromise: Promise<ImageToImagePipeline> | null = null;
+let rawImagePromise: Promise<typeof RawImage> | null = null;
 
 const loadLib = async () => {
   const lib = await import("@huggingface/transformers");
@@ -10,7 +12,7 @@ const loadLib = async () => {
   return lib;
 };
 
-export const loadUpscaler = (progressCallback) => {
+export const loadUpscaler = (progressCallback?: ProgressCallback) => {
   if (!upscalerPromise) {
     upscalerPromise = loadLib()
       .then(({ pipeline }) =>

@@ -1,4 +1,17 @@
+import type { MouseEvent } from "react";
 import Overlay from "./Overlay";
+
+interface CrtTvProps {
+  currentImage: string | null;
+  containerRef: React.RefObject<HTMLButtonElement | null>;
+  handleImageClick: (e: MouseEvent) => Promise<void>;
+  enhanceCount: number;
+  rect: { x: number; y: number; w: number; h: number } | null;
+  isZooming: boolean;
+  ratio: number | null;
+  zoomLevel: number;
+  offset: { x: number; y: number };
+}
 
 export default function CrtTv({
   currentImage,
@@ -10,16 +23,10 @@ export default function CrtTv({
   ratio,
   zoomLevel,
   offset
-}) {
+}: CrtTvProps) {
   return (
     <div className="crt-tv">
-      <button
-        type="button"
-        ref={containerRef}
-        onClick={handleImageClick}
-        onKeyDown={handleImageClick}
-        className="screen-tv"
-      >
+      <button type="button" ref={containerRef} onClick={handleImageClick} className="screen-tv">
         <Overlay />
 
         {enhanceCount >= 3 ? (
@@ -55,7 +62,7 @@ export default function CrtTv({
             style={{
               left: rect.x,
               top: rect.y,
-              width: rect.w * ratio,
+              width: rect.w * (ratio ?? 1),
               height: rect.h
             }}
           >

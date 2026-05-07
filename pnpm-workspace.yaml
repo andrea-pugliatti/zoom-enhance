@@ -1,2 +1,5 @@
 allowBuilds:
   core-js: true
+  onnxruntime-node: true
+  protobufjs: true
+  sharp: true

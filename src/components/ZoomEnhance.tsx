@@ -1,20 +1,20 @@
-import { useEffect, useRef, useState } from "react";
+import { type MouseEvent, useEffect, useRef, useState } from "react";
 import CrtTv from "./CrtTv";
 import InfoBox from "./InfoBox";
 import { getRawImage, loadUpscaler } from "../utils/upscaler";
 import playSound from "../utils/sound";
 
 export default function ZoomEnhance() {
-  const [currentImage, setCurrentImage] = useState(null);
-  const [enhanceCount, setEnhanceCount] = useState(0);
-  const [isZooming, setIsZooming] = useState(false);
-  const [rect, setRect] = useState(null);
-  const [zoomLevel, setZoomLevel] = useState(1);
-  const [offset, setOffset] = useState({ x: 0, y: 0 });
-  const [ratio, setRatio] = useState(null);
-  const [modelStatus, setModelStatus] = useState("loading");
+  const [currentImage, setCurrentImage] = useState<string | null>(null);
+  const [enhanceCount, setEnhanceCount] = useState<number>(0);
+  const [isZooming, setIsZooming] = useState<boolean>(false);
+  const [rect, setRect] = useState<{ x: number; y: number; w: number; h: number } | null>(null);
+  const [zoomLevel, setZoomLevel] = useState<number>(1);
+  const [offset, setOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [ratio, setRatio] = useState<number | null>(null);
+  const [modelStatus, setModelStatus] = useState<"loading" | "ready" | "error">("loading");
 
-  const containerRef = useRef(null);
+  const containerRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -23,7 +23,7 @@ export default function ZoomEnhance() {
         if (!cancelled) setModelStatus("ready");
       })
       .catch((err) => {
-        console.error("Upscaler failed to load:", err);
+        console.error("Upscaler failed to load: ", err);
         if (!cancelled) setModelStatus("error");
       });
     return () => {
@@ -40,9 +40,9 @@ export default function ZoomEnhance() {
     setIsZooming(false);
   };
 
-  const upscaleImage = async (canvas, ctx) => {
+  const upscaleImage = async (canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D) => {
     const [upscaler, RawImage] = await Promise.all([loadUpscaler(), getRawImage()]);
-    const input = await RawImage.fromCanvas(canvas);
+    const input = RawImage.fromCanvas(canvas);
     const output = await upscaler(input);
     const image = Array.isArray(output) ? output[0] : output;
 
@@ -60,36 +60,36 @@ export default function ZoomEnhance() {
     return canvas.toDataURL();
   };
 
-  const handleImageUpload = (e) => {
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    if (!file) return;
+
     const url = URL.createObjectURL(file);
     const img = new Image();
 
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        img.onload = () => {
-          setRatio(img.width / img.height);
-          URL.revokeObjectURL(url);
-        };
-
-        img.onerror = () => {
-          URL.revokeObjectURL(url);
-        };
-
-        img.src = url;
-
-        setCurrentImage(event.target?.result);
-        setZoomLevel(1);
-        setOffset({ x: 0, y: 0 });
-        setRect(null);
-        setEnhanceCount(0);
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      img.onload = () => {
+        setRatio(img.width / img.height);
+        URL.revokeObjectURL(url);
       };
-      reader.readAsDataURL(file);
-    }
+
+      img.onerror = () => {
+        URL.revokeObjectURL(url);
+      };
+
+      img.src = url;
+
+      setCurrentImage(event.target?.result as string);
+      setZoomLevel(1);
+      setOffset({ x: 0, y: 0 });
+      setRect(null);
+      setEnhanceCount(0);
+    };
+    reader.readAsDataURL(file);
   };
 
-  const handleImageClick = async (e) => {
+  const handleImageClick = async (e: MouseEvent) => {
     if (!currentImage || isZooming || !containerRef.current || modelStatus !== "ready") return;
 
     const container = containerRef.current;

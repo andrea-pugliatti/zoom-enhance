@@ -6,6 +6,15 @@ const STATUS_LABELS = {
   error: "MODEL ERROR"
 };
 
+interface InfoBoxProps {
+  isZooming: boolean;
+  rect: { x: number; y: number; w: number; h: number } | null;
+  enhanceCount: number;
+  handleImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  resetAll: () => void;
+  modelStatus?: "loading" | "ready" | "error";
+}
+
 export default function InfoBox({
   isZooming,
   rect,
@@ -13,7 +22,7 @@ export default function InfoBox({
   handleImageUpload,
   resetAll,
   modelStatus = "ready"
-}) {
+}: InfoBoxProps) {
   return (
     <div className="info-box">
       <div>

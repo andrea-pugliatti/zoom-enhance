@@ -1,4 +1,4 @@
-const playSound = (freq, type, duration) => {
+const playSound = (freq: number, type: OscillatorType, duration: number) => {
   try {
     const audioCtx = new window.AudioContext();
     const oscillator = audioCtx.createOscillator();
